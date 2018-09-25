@@ -33,7 +33,7 @@ public class MainController {
     }
 
     @GetMapping("/lk")
-    public String authVk(@RequestParam(name = "code") String code, Map<String, Object> model) {
+    public ModelAndView authVk(@RequestParam(name = "code") String code, Map<String, Object> model) {
 
         // Инициализация
         TransportClient transportClient = HttpTransportClient.getInstance();
@@ -68,7 +68,7 @@ public class MainController {
             e.printStackTrace();
         }
 
-        return "lk";
+        return new ModelAndView("lk", model);
     }
 
     @PostMapping(value = "/auth")
