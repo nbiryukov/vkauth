@@ -69,8 +69,8 @@ public class MainController {
             UserSettings infoUser = vk.account()
                     .getProfileInfo(actor)
                     .execute();
-            model.put("firstName", infoUser.getFirstName());
-            model.put("lastName", infoUser.getLastName());
+            model.put("firstNameUser", infoUser.getFirstName());
+            model.put("lastNameUser", infoUser.getLastName());
 
 
             // Получаем друзей и добавляем их в модель
