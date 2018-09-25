@@ -8,15 +8,24 @@ import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.exceptions.OAuthException;
 import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.UserAuthResponse;
-import com.vk.api.sdk.objects.apps.responses.GetResponse;
+import com.vk.api.sdk.objects.account.Info;
+import com.vk.api.sdk.objects.account.UserSettings;
+import com.vk.api.sdk.objects.friends.UserXtrLists;
+import com.vk.api.sdk.objects.friends.responses.GetFieldsResponse;
+import com.vk.api.sdk.objects.friends.responses.GetResponse;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
+import com.vk.api.sdk.queries.friends.FriendsGetOrder;
+import com.vk.api.sdk.queries.friends.FriendsGetQueryWithFields;
+import com.vk.api.sdk.queries.users.UserField;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.vkauth.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +38,7 @@ public class MainController {
 
     @GetMapping("/")
     public String main() {
+
         return "index";
     }
 
@@ -52,16 +62,29 @@ public class MainController {
         } catch (ClientException e) {
             e.printStackTrace();
         }
-
         UserActor actor = new UserActor(authResponse.getUserId(), authResponse.getAccessToken());
 
-        // Информация о пользователе
         try {
-            List<UserXtrCounters> users = (List<UserXtrCounters>) vk.users().get(actor).execute();
-            for (UserXtrCounters user : users) {
-                model.put("firstName", user.getFirstName());
-                model.put("lastName", user.getLastName());
+            // Получаем информацию о пользователе и добавляем ее в модель
+            UserSettings infoUser = vk.account()
+                    .getProfileInfo(actor)
+                    .execute();
+            model.put("firstName", infoUser.getFirstName());
+            model.put("lastName", infoUser.getLastName());
+
+
+            // Получаем друзей и добавляем их в модель
+            GetFieldsResponse response = vk.friends()
+                    .get(actor, UserField.SEX)
+                    .order(FriendsGetOrder.HINTS)
+                    .count(5)
+                    .execute();
+            List<UserXtrLists> friendsResponse = response.getItems();
+            List<User> friends = new ArrayList<>();
+            for (UserXtrLists friend : friendsResponse) {
+                friends.add(new User(friend.getFirstName(), friend.getLastName()));
             }
+            model.put("friends", friends);
         } catch (ApiException e) {
             e.printStackTrace();
         } catch (ClientException e) {
@@ -75,8 +98,8 @@ public class MainController {
     public ModelAndView openAuth() {
 
         return new ModelAndView(new RedirectView("https://oauth.vk.com/authorize" +
-                "?client_id=6702883" +
-                "&display=page" +
+                "?client_id=" + APP_ID +
+                "&display=popup" +
                 "&redirect_uri=" + REDIRECT_URI +
                 "&scope=friends" +
                 "&response_type=code" +
