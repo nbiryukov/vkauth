@@ -68,7 +68,7 @@ public class MainController {
             e.printStackTrace();
         }
 
-        return new ModelAndView("lk", model);
+        return new ModelAndView("profile", model);
     }
 
     @PostMapping(value = "/auth")
