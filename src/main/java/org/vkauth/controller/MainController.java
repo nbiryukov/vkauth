@@ -93,7 +93,7 @@ public class MainController {
     }
 
     @GetMapping("/profile")
-    public String profile() {
+    public String profile(Map<String, Object> model) {
 
         return "profile";
     }
