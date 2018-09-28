@@ -1,8 +1,10 @@
 package org.vkauth;
 
+import java.util.List;
+
 public class User {
 
-    private int id;
+    private List<User> friends;
     private String firstName;
     private String lastName;
 
@@ -27,11 +29,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public int getId() {
-        return id;
+    public List<User> getFriends() {
+        return friends;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setFriends(List<User> friends) {
+        this.friends = friends;
     }
 }
