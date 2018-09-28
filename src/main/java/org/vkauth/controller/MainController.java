@@ -34,7 +34,12 @@ public class MainController {
     private final String REDIRECT_URI = "https://authvk.herokuapp.com/lk";
 
     @GetMapping("/")
-    public String main() {
+    public String main(HttpServletRequest request) {
+
+        User user = (User) request.getSession().getAttribute("user");
+        if (user != null) {
+            return "redirect:/profile";
+        }
 
         return "index";
     }
