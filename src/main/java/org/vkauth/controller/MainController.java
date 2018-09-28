@@ -14,19 +14,23 @@ import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.friends.FriendsGetOrder;
 import com.vk.api.sdk.queries.users.UserField;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import org.vkauth.User;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Controller
+@SessionAttributes(types = User.class)
 public class MainController {
 
     private final int APP_ID = 6702883;
@@ -34,9 +38,9 @@ public class MainController {
     private final String REDIRECT_URI = "https://authvk.herokuapp.com/lk";
 
     @GetMapping("/")
-    public String main(HttpServletRequest request) {
+    public String main(HttpSession session) {
 
-        User user = (User) request.getSession().getAttribute("user");
+        User user = (User) session.getAttribute("user");
         if (user != null) {
             return "redirect:/profile";
         }
@@ -47,9 +51,9 @@ public class MainController {
     @GetMapping("/lk")
     public String authVk(@RequestParam(name = "code") String code,
                          Map<String, Object> model,
-                         HttpServletRequest request) {
+                         HttpSession session) {
 
-        if (request.getSession().isNew()) {
+        if (session.getAttribute("user") == null) {
 
             // Инициализация
             TransportClient transportClient = HttpTransportClient.getInstance();
@@ -93,8 +97,7 @@ public class MainController {
                 model.put("friends", friends);
                 user.setFriends(friends);
 
-                request.getSession().setMaxInactiveInterval(-1);
-                request.getSession().setAttribute("user", user);
+                session.setAttribute("user", user);
             } catch (ApiException e) {
                 e.printStackTrace();
             } catch (ClientException e) {
@@ -106,9 +109,9 @@ public class MainController {
     }
 
     @GetMapping("/profile")
-    public String profile(Map<String, Object> model, HttpServletRequest request) {
+    public String profile(Map<String, Object> model, HttpSession session) {
 
-        User user = (User) request.getSession().getAttribute("user");
+        User user = (User) session.getAttribute("user");
 
         if (user != null) {
             model.put("firstNameUser", user.getFirstName());
