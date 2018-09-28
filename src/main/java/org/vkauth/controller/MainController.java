@@ -43,7 +43,7 @@ public class MainController {
     }
 
     @GetMapping("/lk")
-    public ModelAndView authVk(@RequestParam(name = "code") String code, Map<String, Object> model) {
+    public String authVk(@RequestParam(name = "code") String code, Map<String, Object> model) {
 
         // Инициализация
         TransportClient transportClient = HttpTransportClient.getInstance();
@@ -89,10 +89,16 @@ public class MainController {
             e.printStackTrace();
         }
 
-        return new ModelAndView("profile", model);
+        return "redirect:/profile";
     }
 
-    @PostMapping(value = "/auth")
+    @GetMapping("/profile")
+    public String profile() {
+
+        return "profile";
+    }
+
+    @PostMapping("/auth")
     public ModelAndView openAuth() {
 
         return new ModelAndView(new RedirectView("https://oauth.vk.com/authorize" +
