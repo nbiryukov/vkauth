@@ -46,8 +46,10 @@ public class MainController {
             model.put("lastNameUser", user.getLastName());
             model.put("friends", user.getFriends());
 
-            Cookie cookie = new Cookie("user", user.toString());
-            cookie.setMaxAge(604800);
+            Gson gson = new Gson();
+            String userJson = gson.toJson(user);
+            Cookie cookie = new Cookie("user", userJson);
+            cookie.setMaxAge(3600);
             responce.addCookie(cookie);
         }
 
