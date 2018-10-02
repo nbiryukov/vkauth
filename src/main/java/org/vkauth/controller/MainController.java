@@ -42,6 +42,9 @@ public class MainController {
             // Авторизируем пользователя
             UserService service = new UserService();
             User user = service.authorization(code);
+            model.put("firstNameUser", user.getFirstName());
+            model.put("lastNameUser", user.getLastName());
+            model.put("friends", user.getFriends());
 
             Gson gson = new Gson();
             String userJson = gson.toJson(user, User.class);
