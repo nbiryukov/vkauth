@@ -13,8 +13,9 @@ import org.vkauth.UserService;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
 
 @Controller
@@ -48,7 +49,12 @@ public class MainController {
 
             Gson gson = new Gson();
             String userJson = gson.toJson(user, User.class);
-            Cookie cookie = new Cookie("user", userJson);
+            Cookie cookie = null;
+            try {
+                cookie = new Cookie("user", URLEncoder.encode(userJson, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             cookie.setMaxAge(3600);
             responce.addCookie(cookie);
         }
@@ -60,7 +66,12 @@ public class MainController {
     public String profile(Map<String, Object> model, HttpServletRequest request) {
 
         if (request.getCookies() != null) {
-            String userJson = request.getCookies()[0].getValue();
+            String userJson = null;
+            try {
+                userJson = URLDecoder.decode(request.getCookies()[0].getValue(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             Gson gson = new Gson();
             User user = gson.fromJson(userJson, User.class);
             model.put("firstNameUser", user.getFirstName());
