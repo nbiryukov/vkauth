@@ -55,7 +55,7 @@ public class MainController {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            cookie.setMaxAge(3600);
+            cookie.setMaxAge(604800);
             responce.addCookie(cookie);
         }
 
