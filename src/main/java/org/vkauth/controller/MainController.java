@@ -1,5 +1,6 @@
 package org.vkauth.controller;
 
+import com.google.gson.Gson;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,17 +10,21 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.vkauth.User;
 import org.vkauth.UserService;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
 public class MainController {
 
     @GetMapping("/")
-    public String main(HttpSession session) {
+    public String main(HttpServletRequest request) {
 
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
             return "redirect:/profile";
         }
 
@@ -29,9 +34,10 @@ public class MainController {
     @GetMapping("/lk")
     public String authVk(@RequestParam(name = "code") String code,
                          Map<String, Object> model,
-                         HttpSession session) {
+                         HttpServletRequest request,
+                         HttpServletResponse responce) {
 
-        if (session.getAttribute("user") == null) {
+        if (request.getCookies() == null) {
 
             // Авторизируем пользователя
             UserService service = new UserService();
@@ -40,18 +46,21 @@ public class MainController {
             model.put("lastNameUser", user.getLastName());
             model.put("friends", user.getFriends());
 
-            session.setAttribute("user", user);
+            Cookie cookie = new Cookie("user", user.toString());
+            cookie.setMaxAge(604800);
+            responce.addCookie(cookie);
         }
 
         return "redirect:/profile";
     }
 
     @GetMapping("/profile")
-    public String profile(Map<String, Object> model, HttpSession session) {
+    public String profile(Map<String, Object> model, HttpServletRequest request) {
 
-        User user = (User) session.getAttribute("user");
-
-        if (user != null) {
+        if (request.getCookies() != null) {
+            String userJson = request.getCookies()[0].getValue();
+            Gson gson = new Gson();
+            User user = gson.fromJson(userJson, User.class);
             model.put("firstNameUser", user.getFirstName());
             model.put("lastNameUser", user.getLastName());
             model.put("friends", user.getFriends());
